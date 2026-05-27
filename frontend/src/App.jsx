@@ -7,6 +7,7 @@ import Settings from "./pages/Settings";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
+import GuestRoute from "./components/GuestRoute";
 export default function App() {
   return (
     <BrowserRouter>
@@ -23,8 +24,23 @@ export default function App() {
         <Route path="/projects" element={<Projects />} />
         <Route path="/pipeline" element={<Pipeline />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={
+            <GuestRoute>
+              <Login />
+            </GuestRoute>
+          }
+        />
+
+        <Route
+          path="/register"
+          element={
+            <GuestRoute>
+              <Register />
+            </GuestRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
