@@ -5,6 +5,7 @@ import Projects from "./pages/Projects";
 import Pipeline from "./pages/Pipeline";
 import Settings from "./pages/Settings";
 import Register from "./pages/Register";
+import Login from "./pages/Login";
 export default function App() {
   return (
     <BrowserRouter>
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/pipeline" element={<Pipeline />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </BrowserRouter>
   );
