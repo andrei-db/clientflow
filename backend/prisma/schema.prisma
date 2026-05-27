@@ -14,4 +14,21 @@ model User {
   passwordHash String
   role         String   @default("user")
   createdAt    DateTime @default(now())
+
+  clients      Client[]
+}
+
+model Client {
+  id        String   @id @default(uuid())
+  name      String
+  company   String
+  email     String
+  phone     String?
+  status    String   @default("lead")
+  value     Int      @default(0)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
