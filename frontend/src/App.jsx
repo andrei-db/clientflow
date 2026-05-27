@@ -6,11 +6,19 @@ import Pipeline from "./pages/Pipeline";
 import Settings from "./pages/Settings";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/clients" element={<Clients />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/pipeline" element={<Pipeline />} />
