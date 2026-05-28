@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layout/MainLayout";
-import AddClientModal from "../components/AddClientModal";
-import { Mail, Phone, Plus, Trash2 } from "lucide-react";
+import { Mail, Phone, Plus, Trash2, Pencil } from "lucide-react";
+import ClientModal from "../components/ClientModal";
 export default function Clients() {
   const [clients, setClients] = useState([]);
   const [error, setError] = useState("");
-
+  
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState(null);
   async function loadClients() {
     try {
       const token = localStorage.getItem("token");
@@ -67,7 +68,10 @@ export default function Clients() {
         </div>
 
         <button className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-neutral-200"
-          onClick={() => setModalOpen(true)}>
+          onClick={() => {
+            setEditingClient(null);
+            setModalOpen(true);
+          }}>
           <Plus size={18} />
           Add client
         </button>
@@ -93,6 +97,16 @@ export default function Clients() {
                 <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-neutral-300">
                   {client.status}
                 </span>
+
+                <button
+                  onClick={() => {
+                    setEditingClient(client);
+                    setModalOpen(true);
+                  }}
+                  className="rounded-xl p-2 text-neutral-500 transition hover:bg-white/10 hover:text-white"
+                >
+                  <Pencil size={16} />
+                </button>
 
                 <button
                   onClick={() => handleDeleteClient(client.id)}
@@ -125,12 +139,26 @@ export default function Clients() {
           </div>
         ))}
       </div>
-      <AddClientModal
+      <ClientModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onClientCreated={(newClient) =>
-          setClients((prev) => [newClient, ...prev])
-        }
+        editingClient={editingClient}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingClient(null);
+        }}
+        onClientSaved={(savedClient) => {
+          setClients((prev) => {
+            const exists = prev.some((client) => client.id === savedClient.id);
+
+            if (exists) {
+              return prev.map((client) =>
+                client.id === savedClient.id ? savedClient : client
+              );
+            }
+
+            return [savedClient, ...prev];
+          });
+        }}
       />
     </MainLayout>
   );

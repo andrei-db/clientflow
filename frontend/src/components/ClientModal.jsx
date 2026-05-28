@@ -1,23 +1,43 @@
-import { useState } from "react";
 import { X } from "lucide-react";
+import { useEffect, useState } from "react";
 
-export default function AddClientModal({
+export default function ClientModal({
   open,
   onClose,
-  onClientCreated,
+  onClientSaved,
+  editingClient,
 }) {
-  const [formData, setFormData] = useState({
-    name: "",
-    company: "",
-    email: "",
-    phone: "",
-    status: "lead",
-    value: "",
-    notes: "",
-  });
+  const emptyForm = {
+  name: "",
+  company: "",
+  email: "",
+  phone: "",
+  status: "lead",
+  value: "",
+  notes: "",
+};
+  const [formData, setFormData] = useState(emptyForm);
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (editingClient) {
+      setFormData({
+        name: editingClient.name || "",
+        company: editingClient.company || "",
+        email: editingClient.email || "",
+        phone: editingClient.phone || "",
+        status: editingClient.status || "lead",
+        value: editingClient.value || "",
+        notes: editingClient.notes || "",
+      });
+    } else {
+      setFormData(emptyForm);
+    }
+
+    setError("");
+  }, [editingClient, open]);
 
   if (!open) return null;
 
@@ -37,8 +57,14 @@ export default function AddClientModal({
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:4000/api/clients", {
-        method: "POST",
+      const url = editingClient
+        ? `http://localhost:4000/api/clients/${editingClient.id}`
+        : "http://localhost:4000/api/clients";
+
+      const method = editingClient ? "PATCH" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -53,24 +79,17 @@ export default function AddClientModal({
         return;
       }
 
-      onClientCreated(data.client);
+      onClientSaved(data.client);
       onClose();
 
-      setFormData({
-        name: "",
-        company: "",
-        email: "",
-        phone: "",
-        status: "lead",
-        value: "",
-        notes: "",
-      });
+      setFormData(emptyForm);
     } catch (err) {
       setError("Could not connect to server");
     } finally {
       setLoading(false);
     }
   }
+
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
@@ -80,7 +99,9 @@ export default function AddClientModal({
       >
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold">Add client</h2>
+            <h2 className="text-2xl font-bold">
+              {editingClient ? "Edit client" : "Add client"}
+            </h2>
             <p className="text-sm text-neutral-500">
               Create a new CRM client.
             </p>
@@ -165,7 +186,13 @@ export default function AddClientModal({
           disabled={loading}
           className="mt-6 w-full rounded-2xl bg-white px-4 py-3 font-semibold text-black hover:bg-neutral-200"
         >
-          {loading ? "Creating..." : "Create client"}
+          {loading
+            ? editingClient
+              ? "Saving..."
+              : "Creating..."
+            : editingClient
+              ? "Save changes"
+              : "Create client"}
         </button>
       </form>
     </div>
