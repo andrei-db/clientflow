@@ -1,0 +1,58 @@
+import express from "express";
+import { prisma } from "../lib/prisma.js";
+import { authRequired } from "../middleware/authMiddleware.js";
+
+const router = express.Router();
+
+router.use(authRequired);
+
+router.get("/", async (req, res) => {
+  try {
+    const projects = await prisma.project.findMany({
+      where: {
+        userId: req.user.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.json({ projects });
+  } catch (error) {
+    console.log("GET PROJECTS ERROR:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.post("/", async (req, res) => {
+  try {
+    const { title, description, status, budget, deadline } = req.body;
+
+    if (!title) {
+      return res.status(400).json({
+        message: "Project title is required",
+      });
+    }
+
+    const project = await prisma.project.create({
+      data: {
+        title,
+        description,
+        status: status || "planned",
+        budget: Number(budget) || 0,
+        deadline: deadline ? new Date(deadline) : null,
+        userId: req.user.id,
+      },
+    });
+
+    res.status(201).json({
+      message: "Project created",
+      project,
+    });
+  } catch (error) {
+    console.log("CREATE PROJECT ERROR:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+export default router;
