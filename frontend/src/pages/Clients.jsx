@@ -13,6 +13,8 @@ export default function Clients() {
   const [statusFilter, setStatusFilter] = useState("all");
 
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     loadClients();
   }, []);
@@ -20,6 +22,7 @@ export default function Clients() {
 
   async function loadClients() {
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
 
       const res = await fetch("http://localhost:4000/api/clients", {
@@ -38,14 +41,16 @@ export default function Clients() {
       setClients(data.clients);
     } catch (err) {
       setError("Could not connect to server");
+    } finally {
+      setLoading(false);
     }
   }
 
   const filteredClients = clients.filter((client) => {
     const matchesSearch =
-      client.name.toLowerCase().includes(search.toLowerCase()) ||
-      client.company.toLowerCase().includes(search.toLowerCase()) ||
-      client.email.toLowerCase().includes(search.toLowerCase());
+      client.name?.toLowerCase().includes(search.toLowerCase()) ||
+      client.company?.toLowerCase().includes(search.toLowerCase()) ||
+      client.email?.toLowerCase().includes(search.toLowerCase());
 
     const matchesStatus =
       statusFilter === "all" || client.status === statusFilter;
@@ -117,66 +122,97 @@ export default function Clients() {
 
       {error && <p className="text-sm text-red-400">{error}</p>}
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {filteredClients.map((client) => (
-          <div
-            key={client.id}
-            className="rounded-3xl border border-white/10 bg-white/[0.03] p-6"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-xl font-semibold">{client.name}</h3>
-                <p className="mt-1 text-sm text-neutral-500">
-                  {client.company}
-                </p>
+      {loading && (
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3].map((item) => (
+            <div
+              key={item}
+              className="h-64 animate-pulse rounded-3xl border border-white/10 bg-white/[0.03]"
+            />
+          ))}
+        </div>
+      )}
+
+      {!loading && filteredClients.length > 0 && (
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {filteredClients.map((client) => (
+            <div
+              key={client.id}
+              className="rounded-3xl border border-white/10 bg-white/[0.03] p-6"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold">{client.name}</h3>
+                  <p className="mt-1 text-sm text-neutral-500">
+                    {client.company}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-neutral-300">
+                    {client.status}
+                  </span>
+
+                  <button
+                    onClick={() => {
+                      setEditingClient(client);
+                      setModalOpen(true);
+                    }}
+                    className="rounded-xl p-2 text-neutral-500 transition hover:bg-white/10 hover:text-white"
+                  >
+                    <Pencil size={16} />
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteClient(client.id)}
+                    className="rounded-xl p-2 text-neutral-500 transition hover:bg-red-500/10 hover:text-red-400"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-neutral-300">
-                  {client.status}
-                </span>
-
-                <button
-                  onClick={() => {
-                    setEditingClient(client);
-                    setModalOpen(true);
-                  }}
-                  className="rounded-xl p-2 text-neutral-500 transition hover:bg-white/10 hover:text-white"
-                >
-                  <Pencil size={16} />
-                </button>
-
-                <button
-                  onClick={() => handleDeleteClient(client.id)}
-                  className="rounded-xl p-2 text-neutral-500 transition hover:bg-red-500/10 hover:text-red-400"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-
-            </div>
-
-            <div className="mt-6 space-y-3 text-sm text-neutral-400">
-              <p className="flex items-center gap-2">
-                <Mail size={16} />
-                {client.email}
-              </p>
-
-              {client.phone && (
+              <div className="mt-6 space-y-3 text-sm text-neutral-400">
                 <p className="flex items-center gap-2">
-                  <Phone size={16} />
-                  {client.phone}
+                  <Mail size={16} />
+                  {client.email}
                 </p>
-              )}
-            </div>
 
-            <div className="mt-6 rounded-2xl bg-black/30 p-4">
-              <p className="text-xs text-neutral-500">Estimated value</p>
-              <p className="mt-1 text-2xl font-bold">€{client.value}</p>
+                {client.phone && (
+                  <p className="flex items-center gap-2">
+                    <Phone size={16} />
+                    {client.phone}
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-6 rounded-2xl bg-black/30 p-4">
+                <p className="text-xs text-neutral-500">Estimated value</p>
+                <p className="mt-1 text-2xl font-bold">€{client.value}</p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
+      {!loading && filteredClients.length === 0 && (
+        <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.03] p-12 text-center">
+          <h3 className="text-xl font-semibold">No clients found</h3>
+          <p className="mt-2 text-sm text-neutral-500">
+            Add your first client or adjust your search filters.
+          </p>
+
+          <button
+            onClick={() => {
+              setEditingClient(null);
+              setModalOpen(true);
+            }}
+            className="mt-6 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black hover:bg-neutral-200"
+          >
+            Add client
+          </button>
+        </div>
+      )}
       <ClientModal
         open={modalOpen}
         editingClient={editingClient}
