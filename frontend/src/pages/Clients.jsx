@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layout/MainLayout";
 import { Mail, Phone, Plus } from "lucide-react";
-
+import AddClientModal from "../components/AddClientModal";
 export default function Clients() {
   const [clients, setClients] = useState([]);
   const [error, setError] = useState("");
 
+  const [modalOpen, setModalOpen] = useState(false);
   async function loadClients() {
     try {
       const token = localStorage.getItem("token");
@@ -41,7 +42,8 @@ export default function Clients() {
           <h2 className="text-4xl font-bold tracking-tight">Clients</h2>
         </div>
 
-        <button className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-neutral-200">
+        <button className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-neutral-200"
+          onClick={() => setModalOpen(true)}>
           <Plus size={18} />
           Add client
         </button>
@@ -89,6 +91,13 @@ export default function Clients() {
           </div>
         ))}
       </div>
+      <AddClientModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onClientCreated={(newClient) =>
+          setClients((prev) => [newClient, ...prev])
+        }
+      />
     </MainLayout>
   );
 }
