@@ -5,9 +5,19 @@ import ClientModal from "../components/ClientModal";
 export default function Clients() {
   const [clients, setClients] = useState([]);
   const [error, setError] = useState("");
-  
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
+
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+
+  useEffect(() => {
+    loadClients();
+  }, []);
+
+
   async function loadClients() {
     try {
       const token = localStorage.getItem("token");
@@ -31,9 +41,17 @@ export default function Clients() {
     }
   }
 
-  useEffect(() => {
-    loadClients();
-  }, []);
+  const filteredClients = clients.filter((client) => {
+    const matchesSearch =
+      client.name.toLowerCase().includes(search.toLowerCase()) ||
+      client.company.toLowerCase().includes(search.toLowerCase()) ||
+      client.email.toLowerCase().includes(search.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "all" || client.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
 
   async function handleDeleteClient(id) {
     try {
@@ -77,10 +95,30 @@ export default function Clients() {
         </button>
       </div>
 
+      <div className="mb-6 flex flex-col gap-3 md:flex-row">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search clients..."
+          className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm outline-none"
+        />
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm outline-none"
+        >
+          <option value="all">All statuses</option>
+          <option value="lead">Lead</option>
+          <option value="contacted">Contacted</option>
+          <option value="client">Client</option>
+        </select>
+      </div>
+
       {error && <p className="text-sm text-red-400">{error}</p>}
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {clients.map((client) => (
+        {filteredClients.map((client) => (
           <div
             key={client.id}
             className="rounded-3xl border border-white/10 bg-white/[0.03] p-6"
