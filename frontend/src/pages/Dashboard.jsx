@@ -1,8 +1,42 @@
+import { useEffect, useState } from "react";
 import MainLayout from "../layout/MainLayout";
 import StatCard from "../components/StatCard";
-import { Users, BriefcaseBusiness, TrendingUp, BadgeDollarSign } from "lucide-react";
+import {
+  Users,
+  BriefcaseBusiness,
+  TrendingUp,
+  BadgeDollarSign,
+} from "lucide-react";
 
 export default function Dashboard() {
+  const [stats, setStats] = useState({
+    totalClients: 0,
+    leads: 0,
+    contacted: 0,
+    activeClients: 0,
+    estimatedRevenue: 0,
+  });
+
+  useEffect(() => {
+    async function loadStats() {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch("http://localhost:4000/api/clients/stats", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setStats(data);
+      }
+    }
+
+    loadStats();
+  }, []);
+
   return (
     <MainLayout>
       <div className="mb-8">
@@ -13,29 +47,29 @@ export default function Dashboard() {
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Total Clients"
-          value="24"
-          description="+8% from last month"
+          value={stats.totalClients}
+          description="All CRM contacts"
           icon={Users}
         />
 
         <StatCard
-          title="Active Projects"
-          value="12"
-          description="4 projects due this week"
-          icon={BriefcaseBusiness}
-        />
-
-        <StatCard
-          title="Conversion Rate"
-          value="38%"
-          description="+12% compared to last quarter"
+          title="Leads"
+          value={stats.leads}
+          description="Potential clients"
           icon={TrendingUp}
         />
 
         <StatCard
+          title="Contacted"
+          value={stats.contacted}
+          description="Clients already contacted"
+          icon={BriefcaseBusiness}
+        />
+
+        <StatCard
           title="Estimated Revenue"
-          value="€18.4k"
-          description="Projected monthly value"
+          value={`€${stats.estimatedRevenue}`}
+          description="Total pipeline value"
           icon={BadgeDollarSign}
         />
       </div>

@@ -53,6 +53,43 @@ router.post("/", async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 });
+router.get("/stats", async (req, res) => {
+    try {
+        const clients = await prisma.client.findMany({
+            where: {
+                userId: req.user.id,
+            },
+        });
+
+        const totalClients = clients.length;
+        const leads = clients.filter((client) => client.status === "lead").length;
+        const contacted = clients.filter(
+            (client) => client.status === "contacted"
+        ).length;
+        const activeClients = clients.filter(
+            (client) => client.status === "client"
+        ).length;
+
+        const estimatedRevenue = clients.reduce(
+            (sum, client) => sum + client.value,
+            0
+        );
+
+        res.json({
+            totalClients,
+            leads,
+            contacted,
+            activeClients,
+            estimatedRevenue,
+        });
+    } catch (error) {
+        console.log("CLIENT STATS ERROR:", error);
+
+        res.status(500).json({
+            message: "Server error",
+        });
+    }
+});
 router.patch("/:id", async (req, res) => {
     try {
         const { id } = req.params;
