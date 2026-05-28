@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layout/MainLayout";
-import { Mail, Phone, Plus } from "lucide-react";
 import AddClientModal from "../components/AddClientModal";
+import { Mail, Phone, Plus, Trash2 } from "lucide-react";
 export default function Clients() {
   const [clients, setClients] = useState([]);
   const [error, setError] = useState("");
@@ -34,6 +34,30 @@ export default function Clients() {
     loadClients();
   }, []);
 
+  async function handleDeleteClient(id) {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `http://localhost:4000/api/clients/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) return;
+
+      setClients((prev) =>
+        prev.filter((client) => client.id !== id)
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <MainLayout>
       <div className="mb-8 flex items-center justify-between">
@@ -65,9 +89,19 @@ export default function Clients() {
                 </p>
               </div>
 
-              <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-neutral-300">
-                {client.status}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-neutral-300">
+                  {client.status}
+                </span>
+
+                <button
+                  onClick={() => handleDeleteClient(client.id)}
+                  className="rounded-xl p-2 text-neutral-500 transition hover:bg-red-500/10 hover:text-red-400"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+
             </div>
 
             <div className="mt-6 space-y-3 text-sm text-neutral-400">
