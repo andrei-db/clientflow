@@ -16,6 +16,13 @@ export default function Dashboard() {
         activeClients: 0,
         estimatedRevenue: 0,
     });
+    const [projectStats, setProjectStats] = useState({
+        totalProjects: 0,
+        planned: 0,
+        inProgress: 0,
+        completed: 0,
+        totalBudget: 0,
+    });
 
     const [recentClients, setRecentClients] = useState([]);
 
@@ -47,6 +54,18 @@ export default function Dashboard() {
 
             if (clientsRes.ok) {
                 setRecentClients(clientsData.clients.slice(0, 5));
+            }
+
+            const projectStatsRes = await fetch("http://localhost:4000/api/projects/stats", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const projectStatsData = await projectStatsRes.json();
+
+            if (projectStatsRes.ok) {
+                setProjectStats(projectStatsData);
             }
         }
 
@@ -120,6 +139,35 @@ export default function Dashboard() {
                         <p className="text-sm text-neutral-500">No clients yet.</p>
                     )}
                 </div>
+            </div>
+            <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+                <StatCard
+                    title="Total Projects"
+                    value={projectStats.totalProjects}
+                    description="All active and completed work"
+                    icon={BriefcaseBusiness}
+                />
+
+                <StatCard
+                    title="In Progress"
+                    value={projectStats.inProgress}
+                    description="Projects currently being worked on"
+                    icon={TrendingUp}
+                />
+
+                <StatCard
+                    title="Completed"
+                    value={projectStats.completed}
+                    description="Successfully delivered projects"
+                    icon={Users}
+                />
+
+                <StatCard
+                    title="Project Budget"
+                    value={`€${projectStats.totalBudget}`}
+                    description="Total project value"
+                    icon={BadgeDollarSign}
+                />
             </div>
         </MainLayout>
     );
