@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { apiFetch } from "../lib/api";
 
 export default function ClientModal({
   open,
@@ -55,31 +56,24 @@ export default function ClientModal({
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-
       const url = editingClient
-        ? `http://localhost:4000/api/clients/${editingClient.id}`
-        : "http://localhost:4000/api/clients";
+        ? `/api/clients/${editingClient.id}`
+        : "/api/clients";
 
-      const method = editingClient ? "PATCH" : "POST";
+      const methodText = editingClient ? "PATCH" : "POST";
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
+     const client = await apiFetch(url, {
+        method: methodText,
+        body: JSON.stringify(formData)
       });
+      
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Could not create client");
+      if (!client.res.ok) {
+        setError(client.data.message || "Could not create client");
         return;
       }
 
-      onClientSaved(data.client);
+      onClientSaved(client.data.client);
       onClose();
 
       setFormData(emptyForm);

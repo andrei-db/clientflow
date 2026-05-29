@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import { apiFetch } from "../lib/api";
 
 const emptyForm = {
     title: "",
@@ -52,31 +53,26 @@ export default function ProjectModal({
         setLoading(true);
 
         try {
-            const token = localStorage.getItem("token");
 
             const url = editingProject
-                ? `http://localhost:4000/api/projects/${editingProject.id}`
-                : "http://localhost:4000/api/projects";
+                ? `/api/projects/${editingProject.id}`
+                : "/api/projects";
 
             const method = editingProject ? "PATCH" : "POST";
 
-            const res = await fetch(url, {
+            const project = await apiFetch(url, {
                 method,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
                 body: JSON.stringify(formData),
             });
 
-            const data = await res.json();
+          
 
-            if (!res.ok) {
-                setError(data.message || "Could not create project");
+            if (!project.res.ok) {
+                setError(project.data.message || "Could not create project");
                 return;
             }
 
-            onProjectSaved(data.project);
+            onProjectSaved(project.data.project);
             setFormData(emptyForm);
             onClose();
         } catch (err) {

@@ -3,6 +3,7 @@ import MainLayout from "../layout/MainLayout";
 import { Plus } from "lucide-react";
 import ProjectModal from "../components/ProjectModal";
 import ProjectCard from "../components/ProjectCard";
+import { apiFetch } from "../lib/api";
 
 const columns = [
   { title: "Planned", status: "planned" },
@@ -25,22 +26,14 @@ export default function Projects() {
     try {
       setLoading(true);
 
-      const token = localStorage.getItem("token");
+      const project = await apiFetch("/api/projects");
 
-      const res = await fetch("http://localhost:4000/api/projects", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Could not load projects");
+      if (!project.res.ok) {
+        setError(project.data.message || "Could not load projects");
         return;
       }
 
-      setProjects(data.projects);
+      setProjects(project.data.projects);
     } catch (err) {
       setError("Could not connect to server");
     } finally {
@@ -65,16 +58,11 @@ export default function Projects() {
 
   async function handleDeleteProject(id) {
     try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(`http://localhost:4000/api/projects/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const project = await apiFetch(`/api/projects/${id}`, {
+        method: "DELETE"
       });
 
-      if (!res.ok) return;
+      if (!project.res.ok) return;
 
       setProjects((prev) => prev.filter((project) => project.id !== id));
     } catch (error) {
@@ -84,16 +72,11 @@ export default function Projects() {
 
   async function handleStatusChange(project, newStatus) {
     try {
-      const token = localStorage.getItem("token");
 
-      const res = await fetch(
-        `http://localhost:4000/api/projects/${project.id}`,
+      const projectApi = await apiFetch(
+        `/api/projects/${project.id}`,
         {
           method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify({
             title: project.title,
             description: project.description,
@@ -104,12 +87,11 @@ export default function Projects() {
         }
       );
 
-      const data = await res.json();
 
-      if (!res.ok) return;
+      if (!projectApi.res.ok) return;
 
       setProjects((prev) =>
-        prev.map((item) => (item.id === project.id ? data.project : item))
+        prev.map((item) => (item.id === project.id ? projectApi.data.project : item))
       );
     } catch (error) {
       console.log(error);

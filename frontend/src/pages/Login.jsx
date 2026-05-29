@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../features/auth/authSlice";
+import { apiFetch } from "../lib/api";
 export default function Login() {
     const [formData, setFormData] = useState({
         email: "",
@@ -25,22 +26,17 @@ export default function Login() {
         setLoading(true);
 
         try {
-            const res = await fetch("http://localhost:4000/api/auth/login", {
+            const login = await apiFetch("/api/auth/login", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
                 body: JSON.stringify(formData),
             });
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                setError(data.message || "Something went wrong");
+            if (!login.res.ok) {
+                setError(login.data.message || "Something went wrong");
                 return;
             }
 
-            dispatch(loginSuccess(data));
+            dispatch(loginSuccess(login.data));
 
             window.location.href = "/";
         } catch (err) {

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import MainLayout from "../layout/MainLayout";
 import { Mail, Phone, Plus, Trash2, Pencil } from "lucide-react";
 import ClientModal from "../components/ClientModal";
+import { apiFetch } from "../lib/api";
 export default function Clients() {
   const [clients, setClients] = useState([]);
   const [error, setError] = useState("");
@@ -23,22 +24,16 @@ export default function Clients() {
   async function loadClients() {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const clients = await apiFetch("/api/clients");
 
-      const res = await fetch("http://localhost:4000/api/clients", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Could not load clients");
+      if (!clients.res.ok) {
+        setError(clients.data.message);
         return;
       }
 
-      setClients(data.clients);
+      setClients(clients.data.clients);
+
+
     } catch (err) {
       setError("Could not connect to server");
     } finally {
@@ -60,19 +55,11 @@ export default function Clients() {
 
   async function handleDeleteClient(id) {
     try {
-      const token = localStorage.getItem("token");
+      const client = await apiFetch(`/api/clients/${id}`, {
+        method: "DELETE",
+      });
 
-      const res = await fetch(
-        `http://localhost:4000/api/clients/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!res.ok) return;
+      if (!client.res.ok) return;
 
       setClients((prev) =>
         prev.filter((client) => client.id !== id)

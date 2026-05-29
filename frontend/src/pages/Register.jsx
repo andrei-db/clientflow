@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiFetch } from "../lib/api";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -25,18 +26,14 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:4000/api/auth/register", {
+      const register = await apiFetch("/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json();
 
-      if (!res.ok) {
-        setError(data.message || "Something went wrong");
+      if (!register.res.ok) {
+        setError(register.data.message || "Something went wrong");
         return;
       }
 

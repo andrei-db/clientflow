@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import MainLayout from "../layout/MainLayout";
 import { updateUser } from "../features/auth/authSlice";
+import { apiFetch } from "../lib/api";
 
 export default function Settings() {
   const dispatch = useDispatch();
@@ -35,21 +36,14 @@ export default function Settings() {
     setPasswordLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:4000/api/auth/password", {
+      const password = await apiFetch("/api/auth/password", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify(passwordData),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setPasswordError(data.message || "Could not update password");
+      if (!password.res.ok) {
+        setPasswordError(password.data.message || "Could not update password");
         return;
       }
 
@@ -72,25 +66,17 @@ export default function Settings() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch("http://localhost:4000/api/auth/profile", {
+      const profile = await apiFetch("/api/auth/profile", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ name }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Could not update profile");
+      if (!profile.res.ok) {
+        setError(profile.data.message || "Could not update profile");
         return;
       }
 
-      dispatch(updateUser(data.user));
+      dispatch(updateUser(profile.data.user));
       setSuccess("Profile updated successfully");
     } catch (err) {
       setError("Could not connect to server");

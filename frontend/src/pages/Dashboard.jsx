@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layout/MainLayout";
 import StatCard from "../components/StatCard";
+import { apiFetch } from "../lib/api";
 import {
     Users,
     BriefcaseBusiness,
@@ -29,56 +30,28 @@ export default function Dashboard() {
 
     useEffect(() => {
         async function loadStats() {
-            const token = localStorage.getItem("token");
+            const clientStats = await apiFetch("/api/clients/stats");
 
-            const res = await fetch("http://localhost:4000/api/clients/stats", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            const data = await res.json();
-
-
-
-            if (res.ok) {
-                setStats(data);
+            if (clientStats.res.ok) {
+                setStats(clientStats.data);
             }
 
-            const clientsRes = await fetch("http://localhost:4000/api/clients", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const clients = await apiFetch("/api/clients");
 
-            const clientsData = await clientsRes.json();
-
-            if (clientsRes.ok) {
-                setRecentClients(clientsData.clients.slice(0, 5));
+            if (clients.res.ok) {
+                setRecentClients(clients.data.clients.slice(0, 5));
             }
 
-            const projectStatsRes = await fetch("http://localhost:4000/api/projects/stats", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const projectStats = await apiFetch("/api/projects/stats");
 
-            const projectStatsData = await projectStatsRes.json();
-
-            if (projectStatsRes.ok) {
-                setProjectStats(projectStatsData);
+            if (projectStats.res.ok) {
+                setProjectStats(projectStats.data);
             }
 
-            const projectsRes = await fetch("http://localhost:4000/api/projects", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const projects = await apiFetch("/api/projects");
 
-            const projectsData = await projectsRes.json();
-
-            if (projectsRes.ok) {
-                setRecentProjects(projectsData.projects.slice(0, 5));
+            if (projects.res.ok) {
+                setRecentProjects(projects.data.projects.slice(0, 5));
             }
         }
 
