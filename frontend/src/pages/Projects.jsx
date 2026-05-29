@@ -1,32 +1,30 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layout/MainLayout";
-import { Calendar, Plus, Wallet, Trash2, Pencil } from "lucide-react";
+import { Plus } from "lucide-react";
 import ProjectModal from "../components/ProjectModal";
+import ProjectCard from "../components/ProjectCard";
+
+const columns = [
+  { title: "Planned", status: "planned" },
+  { title: "In Progress", status: "in_progress" },
+  { title: "Completed", status: "completed" },
+];
+
 export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  useEffect(() => {
-    loadProjects();
-  }, []);
-  const filteredProjects = projects.filter((project) => {
-    const matchesSearch =
-      project.title?.toLowerCase().includes(search.toLowerCase()) ||
-      project.description?.toLowerCase().includes(search.toLowerCase());
-
-    const matchesStatus =
-      statusFilter === "all" || project.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
-  });
 
   async function loadProjects() {
     try {
       setLoading(true);
+
       const token = localStorage.getItem("token");
 
       const res = await fetch("http://localhost:4000/api/projects", {
@@ -50,6 +48,20 @@ export default function Projects() {
     }
   }
 
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const filteredProjects = projects.filter((project) => {
+    const matchesSearch =
+      project.title?.toLowerCase().includes(search.toLowerCase()) ||
+      project.description?.toLowerCase().includes(search.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "all" || project.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
 
   async function handleDeleteProject(id) {
     try {
@@ -69,6 +81,41 @@ export default function Projects() {
       console.log(error);
     }
   }
+
+  async function handleStatusChange(project, newStatus) {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `http://localhost:4000/api/projects/${project.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: project.title,
+            description: project.description,
+            status: newStatus,
+            budget: project.budget,
+            deadline: project.deadline,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) return;
+
+      setProjects((prev) =>
+        prev.map((item) => (item.id === project.id ? data.project : item))
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <MainLayout>
       <div className="mb-8 flex items-center justify-between">
@@ -77,17 +124,17 @@ export default function Projects() {
           <h2 className="text-4xl font-bold tracking-tight">Projects</h2>
         </div>
 
-        <button onClick={() => {
-          setEditingProject(null);
-          setModalOpen(true);
-        }}
-          className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-neutral-200">
+        <button
+          onClick={() => {
+            setEditingProject(null);
+            setModalOpen(true);
+          }}
+          className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-neutral-200"
+        >
           <Plus size={18} />
           Add project
         </button>
       </div>
-
-      {error && <p className="text-sm text-red-400">{error}</p>}
 
       <div className="mb-6 flex flex-col gap-3 md:flex-row">
         <input
@@ -109,82 +156,78 @@ export default function Projects() {
         </select>
       </div>
 
+      {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
+
       {loading && (
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-5 xl:grid-cols-3">
           {[1, 2, 3].map((item) => (
             <div
               key={item}
-              className="h-56 animate-pulse rounded-3xl border border-white/10 bg-white/[0.03]"
+              className="h-80 animate-pulse rounded-3xl border border-white/10 bg-white/[0.03]"
             />
           ))}
         </div>
       )}
 
-      {!loading && projects.length > 0 && (
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {filteredProjects.map((project) => (
-            <div
-              key={project.id}
-              className="rounded-3xl border border-white/10 bg-white/[0.03] p-6"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-xl font-semibold">{project.title}</h3>
-                  <p className="mt-2 text-sm text-neutral-500">
-                    {project.description || "No description"}
-                  </p>
-                </div>
+      {!loading && filteredProjects.length > 0 && (
+        <div className="grid gap-5 xl:grid-cols-3">
+          {columns.map((column) => {
+            const columnProjects = filteredProjects.filter(
+              (project) => project.status === column.status
+            );
 
-                <div className="flex items-center gap-3">
-                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-neutral-300">
-                    {project.status}
+            return (
+              <div
+                key={column.status}
+                className="rounded-3xl border border-white/10 bg-white/[0.03] p-5"
+              >
+                <div className="mb-5 flex items-center justify-between">
+                  <h3 className="font-semibold">{column.title}</h3>
+
+                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-neutral-400">
+                    {columnProjects.length}
                   </span>
+                </div>
 
-                  <button
-                    onClick={() => {
-                      setEditingProject(project);
-                      setModalOpen(true);
-                    }}
-                    className="rounded-xl p-2 text-neutral-500 transition hover:bg-white/10 hover:text-white"
-                  >
-                    <Pencil size={16} />
-                  </button>
-
-                  <button
-                    onClick={() => handleDeleteProject(project.id)}
-                    className="rounded-xl p-2 text-neutral-500 transition hover:bg-red-500/10 hover:text-red-400"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                <div className="space-y-4">
+                  {columnProjects.map((project) => (
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      onEdit={(project) => {
+                        setEditingProject(project);
+                        setModalOpen(true);
+                      }}
+                      onDelete={handleDeleteProject}
+                      onStatusChange={handleStatusChange}
+                    />
+                  ))}
                 </div>
               </div>
-
-              <div className="mt-6 space-y-3 text-sm text-neutral-400">
-                <p className="flex items-center gap-2">
-                  <Wallet size={16} />
-                  €{project.budget}
-                </p>
-
-                <p className="flex items-center gap-2">
-                  <Calendar size={16} />
-                  {project.deadline
-                    ? new Date(project.deadline).toLocaleDateString()
-                    : "No deadline"}
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       {!loading && filteredProjects.length === 0 && (
         <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.03] p-12 text-center">
-          <h3 className="text-xl font-semibold">No projects yet</h3>
+          <h3 className="text-xl font-semibold">No projects found</h3>
           <p className="mt-2 text-sm text-neutral-500">
-            Create your first project and track its budget, status and deadline.
+            Create your first project or adjust your filters.
           </p>
+
+          <button
+            onClick={() => {
+              setEditingProject(null);
+              setModalOpen(true);
+            }}
+            className="mt-6 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black hover:bg-neutral-200"
+          >
+            Add project
+          </button>
         </div>
       )}
+
       <ProjectModal
         open={modalOpen}
         editingProject={editingProject}
@@ -194,7 +237,9 @@ export default function Projects() {
         }}
         onProjectSaved={(savedProject) => {
           setProjects((prev) => {
-            const exists = prev.some((project) => project.id === savedProject.id);
+            const exists = prev.some(
+              (project) => project.id === savedProject.id
+            );
 
             if (exists) {
               return prev.map((project) =>
