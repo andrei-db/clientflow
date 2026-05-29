@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import ActivityFeed from "../components/ActivityFeed";
-
+import ClientsStatusChart from "../components/ClientsStatusChart";
 export default function Dashboard() {
     const [stats, setStats] = useState({
         totalClients: 0,
@@ -101,6 +101,10 @@ export default function Dashboard() {
                     description="Total pipeline value"
                     icon={BadgeDollarSign}
                 />
+            </div>
+
+            <div className="mt-8 grid gap-6 xl:grid-cols-2">
+                <ClientsStatusChart stats={stats} />
             </div>
 
 
