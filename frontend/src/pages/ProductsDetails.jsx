@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import MainLayout from "../layout/MainLayout";
 import { apiFetch } from "../lib/api";
-
+import TaskCard from "../components/TaskCard";
 export default function ProjectDetails() {
     const { id } = useParams();
 
@@ -183,36 +183,12 @@ export default function ProjectDetails() {
 
                 <div className="space-y-3">
                     {project.tasks.map((task) => (
-                        <div
+                        <TaskCard
                             key={task.id}
-                            className="flex items-center justify-between gap-4 rounded-2xl bg-black/30 p-4"
-                        >
-                            <div>
-                                <p className="font-medium">{task.title}</p>
-                                <p className="text-xs text-neutral-500">{task.status}</p>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <select
-                                    value={task.status}
-                                    onChange={(e) =>
-                                        handleTaskStatusChange(task, e.target.value)
-                                    }
-                                    className="rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none"
-                                >
-                                    <option value="todo">Todo</option>
-                                    <option value="in_progress">In progress</option>
-                                    <option value="done">Done</option>
-                                </select>
-
-                                <button
-                                    onClick={() => handleDeleteTask(task.id)}
-                                    className="rounded-xl px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
+                            task={task}
+                            onStatusChange={handleTaskStatusChange}
+                            onDelete={handleDeleteTask}
+                        />
                     ))}
 
                     {project.tasks.length === 0 && (
