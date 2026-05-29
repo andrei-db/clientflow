@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layout/MainLayout";
-import { Calendar, Plus, Wallet, Trash2 } from "lucide-react";
+import { Calendar, Plus, Wallet, Trash2, Pencil } from "lucide-react";
 import ProjectModal from "../components/ProjectModal";
 export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState(null);
 
   useEffect(() => {
     loadProjects();
@@ -65,7 +66,10 @@ export default function Projects() {
           <h2 className="text-4xl font-bold tracking-tight">Projects</h2>
         </div>
 
-        <button onClick={() => setModalOpen(true)}
+        <button onClick={() => {
+          setEditingProject(null);
+          setModalOpen(true);
+        }}
           className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-neutral-200">
           <Plus size={18} />
           Add project
@@ -106,6 +110,16 @@ export default function Projects() {
                   </span>
 
                   <button
+                    onClick={() => {
+                      setEditingProject(project);
+                      setModalOpen(true);
+                    }}
+                    className="rounded-xl p-2 text-neutral-500 transition hover:bg-white/10 hover:text-white"
+                  >
+                    <Pencil size={16} />
+                  </button>
+
+                  <button
                     onClick={() => handleDeleteProject(project.id)}
                     className="rounded-xl p-2 text-neutral-500 transition hover:bg-red-500/10 hover:text-red-400"
                   >
@@ -142,10 +156,24 @@ export default function Projects() {
       )}
       <ProjectModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onProjectCreated={(newProject) =>
-          setProjects((prev) => [newProject, ...prev])
-        }
+        editingProject={editingProject}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingProject(null);
+        }}
+        onProjectSaved={(savedProject) => {
+          setProjects((prev) => {
+            const exists = prev.some((project) => project.id === savedProject.id);
+
+            if (exists) {
+              return prev.map((project) =>
+                project.id === savedProject.id ? savedProject : project
+              );
+            }
+
+            return [savedProject, ...prev];
+          });
+        }}
       />
     </MainLayout>
   );

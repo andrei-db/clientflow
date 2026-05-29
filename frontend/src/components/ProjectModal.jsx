@@ -1,140 +1,177 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 
 const emptyForm = {
-  title: "",
-  description: "",
-  status: "planned",
-  budget: "",
-  deadline: "",
+    title: "",
+    description: "",
+    status: "planned",
+    budget: "",
+    deadline: "",
 };
 
-export default function ProjectModal({ open, onClose, onProjectCreated }) {
-  const [formData, setFormData] = useState(emptyForm);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+export default function ProjectModal({
+    open,
+    onClose,
+    onProjectSaved,
+    editingProject,
+}) {
+    const [formData, setFormData] = useState(emptyForm);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
-  if (!open) return null;
+    useEffect(() => {
+        if (editingProject) {
+            setFormData({
+                title: editingProject.title || "",
+                description: editingProject.description || "",
+                status: editingProject.status || "planned",
+                budget: editingProject.budget || "",
+                deadline: editingProject.deadline
+                    ? editingProject.deadline.split("T")[0]
+                    : "",
+            });
+        } else {
+            setFormData(emptyForm);
+        }
 
-  function handleChange(e) {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  }
+        setError("");
+    }, [editingProject, open]);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+    if (!open) return null;
 
-    try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch("http://localhost:4000/api/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Could not create project");
-        return;
-      }
-
-      onProjectCreated(data.project);
-      setFormData(emptyForm);
-      onClose();
-    } catch (err) {
-      setError("Could not connect to server");
-    } finally {
-      setLoading(false);
+    function handleChange(e) {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value,
+        });
     }
-  }
 
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-xl rounded-3xl border border-white/10 bg-[#111111] p-6"
-      >
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">Add project</h2>
-            <p className="text-sm text-neutral-500">
-              Create a new client project.
-            </p>
-          </div>
+    async function handleSubmit(e) {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl p-2 hover:bg-white/10"
-          >
-            <X size={18} />
-          </button>
+        try {
+            const token = localStorage.getItem("token");
+
+            const url = editingProject
+                ? `http://localhost:4000/api/projects/${editingProject.id}`
+                : "http://localhost:4000/api/projects";
+
+            const method = editingProject ? "PATCH" : "POST";
+
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.message || "Could not create project");
+                return;
+            }
+
+            onProjectSaved(data.project);
+            setFormData(emptyForm);
+            onClose();
+        } catch (err) {
+            setError("Could not connect to server");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
+            <form
+                onSubmit={handleSubmit}
+                className="w-full max-w-xl rounded-3xl border border-white/10 bg-[#111111] p-6"
+            >
+                <div className="mb-6 flex items-center justify-between">
+                    <div>
+                        <h2 className="text-2xl font-bold">
+                            {editingProject ? "Edit project" : "Add project"}
+                        </h2>
+                        <p className="text-sm text-neutral-500">
+                            Create a new client project.
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="rounded-xl p-2 hover:bg-white/10"
+                    >
+                        <X size={18} />
+                    </button>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                    <input
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        placeholder="Project title"
+                        className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 outline-none"
+                    />
+
+                    <input
+                        name="budget"
+                        type="number"
+                        value={formData.budget}
+                        onChange={handleChange}
+                        placeholder="Budget"
+                        className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 outline-none"
+                    />
+
+                    <select
+                        name="status"
+                        value={formData.status}
+                        onChange={handleChange}
+                        className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 outline-none"
+                    >
+                        <option value="planned">Planned</option>
+                        <option value="in_progress">In progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+
+                    <input
+                        name="deadline"
+                        type="date"
+                        value={formData.deadline}
+                        onChange={handleChange}
+                        className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 outline-none"
+                    />
+                </div>
+
+                <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="Description..."
+                    className="mt-4 h-32 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 outline-none"
+                />
+
+                {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+
+                <button
+                    disabled={loading}
+                    className="mt-6 w-full rounded-2xl bg-white px-4 py-3 font-semibold text-black hover:bg-neutral-200 disabled:opacity-60"
+                >
+                    {loading
+                        ? editingProject
+                            ? "Saving..."
+                            : "Creating..."
+                        : editingProject
+                            ? "Save changes"
+                            : "Create project"}
+                </button>
+            </form>
         </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <input
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            placeholder="Project title"
-            className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 outline-none"
-          />
-
-          <input
-            name="budget"
-            type="number"
-            value={formData.budget}
-            onChange={handleChange}
-            placeholder="Budget"
-            className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 outline-none"
-          />
-
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 outline-none"
-          >
-            <option value="planned">Planned</option>
-            <option value="in_progress">In progress</option>
-            <option value="completed">Completed</option>
-          </select>
-
-          <input
-            name="deadline"
-            type="date"
-            value={formData.deadline}
-            onChange={handleChange}
-            className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 outline-none"
-          />
-        </div>
-
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          placeholder="Description..."
-          className="mt-4 h-32 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 outline-none"
-        />
-
-        {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
-
-        <button
-          disabled={loading}
-          className="mt-6 w-full rounded-2xl bg-white px-4 py-3 font-semibold text-black hover:bg-neutral-200 disabled:opacity-60"
-        >
-          {loading ? "Creating..." : "Create project"}
-        </button>
-      </form>
-    </div>
-  );
+    );
 }
