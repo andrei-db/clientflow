@@ -9,14 +9,14 @@ export default function ClientModal({
   editingClient,
 }) {
   const emptyForm = {
-  name: "",
-  company: "",
-  email: "",
-  phone: "",
-  status: "lead",
-  value: "",
-  notes: "",
-};
+    name: "",
+    company: "",
+    email: "",
+    phone: "",
+    status: "lead",
+    value: "",
+    notes: "",
+  };
   const [formData, setFormData] = useState(emptyForm);
 
   const [error, setError] = useState("");
@@ -62,11 +62,11 @@ export default function ClientModal({
 
       const methodText = editingClient ? "PATCH" : "POST";
 
-     const client = await apiFetch(url, {
+      const client = await apiFetch(url, {
         method: methodText,
         body: JSON.stringify(formData)
       });
-      
+
 
       if (!client.res.ok) {
         setError(client.data.message || "Could not create client");
@@ -151,7 +151,9 @@ export default function ClientModal({
           >
             <option value="lead">Lead</option>
             <option value="contacted">Contacted</option>
+            <option value="proposal">Proposal</option>
             <option value="client">Client</option>
+            <option value="lost">Lost</option>
           </select>
 
           <input

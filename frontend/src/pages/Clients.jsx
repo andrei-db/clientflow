@@ -104,6 +104,8 @@ export default function Clients() {
           <option value="lead">Lead</option>
           <option value="contacted">Contacted</option>
           <option value="client">Client</option>
+          <option value="proposal">Proposal</option>
+          <option value="lost">Lost</option>
         </select>
       </div>
 
