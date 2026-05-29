@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layout/MainLayout";
 import { Calendar, Plus, Wallet } from "lucide-react";
-
+import ProjectModal from "../components/ProjectModal";
 export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-
+  const [modalOpen, setModalOpen] = useState(false); 
   async function loadProjects() {
     try {
       setLoading(true);
@@ -45,7 +45,8 @@ export default function Projects() {
           <h2 className="text-4xl font-bold tracking-tight">Projects</h2>
         </div>
 
-        <button className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-neutral-200">
+        <button onClick={() => setModalOpen(true)}
+         className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-neutral-200">
           <Plus size={18} />
           Add project
         </button>
@@ -110,6 +111,13 @@ export default function Projects() {
           </p>
         </div>
       )}
+      <ProjectModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onProjectCreated={(newProject) =>
+          setProjects((prev) => [newProject, ...prev])
+        }
+      />
     </MainLayout>
   );
 }
