@@ -132,4 +132,42 @@ router.get("/me", authRequired, async (req, res) => {
     });
   }
 });
+router.patch("/profile", authRequired, async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name) {
+      return res.status(400).json({
+        message: "Name is required",
+      });
+    }
+
+    const user = await prisma.user.update({
+      where: {
+        id: req.user.id,
+      },
+      data: {
+        name,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+
+    res.json({
+      message: "Profile updated successfully",
+      user,
+    });
+  } catch (error) {
+    console.log("UPDATE PROFILE ERROR:", error);
+
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+});
 export default router;
