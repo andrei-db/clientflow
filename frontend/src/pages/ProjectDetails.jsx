@@ -102,6 +102,16 @@ export default function ProjectDetails() {
         );
     }
 
+    const totalTasks = project.tasks.length;
+
+    const completedTasks = project.tasks.filter(
+        (task) => task.status === "done"
+    ).length;
+
+    const progress =
+        totalTasks > 0
+            ? Math.round((completedTasks / totalTasks) * 100)
+            : 0;
     return (
         <MainLayout>
             <Link to="/projects" className="text-sm text-neutral-400 hover:text-white">
@@ -134,7 +144,7 @@ export default function ProjectDetails() {
                 )}
             </div>
 
-            <div className="mt-6 grid gap-5 md:grid-cols-3">
+            <div className="mt-6 grid gap-5 md:grid-cols-4">
                 <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
                     <p className="text-sm text-neutral-500">Budget</p>
                     <p className="mt-2 text-3xl font-bold">€{project.budget}</p>
@@ -153,6 +163,26 @@ export default function ProjectDetails() {
                     <p className="text-sm text-neutral-500">Created</p>
                     <p className="mt-2 text-2xl font-bold">
                         {new Date(project.createdAt).toLocaleDateString()}
+                    </p>
+                </div>
+                <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                    <p className="text-sm text-neutral-500">Progress</p>
+
+                    <p className="mt-2 text-3xl font-bold">
+                        {progress}%
+                    </p>
+
+                    <div className="mt-4 h-2 rounded-full bg-white/10">
+                        <div
+                            className="h-2 rounded-full bg-white"
+                            style={{
+                                width: `${progress}%`,
+                            }}
+                        />
+                    </div>
+
+                    <p className="mt-3 text-xs text-neutral-500">
+                        {completedTasks} / {totalTasks} tasks completed
                     </p>
                 </div>
             </div>
@@ -182,7 +212,7 @@ export default function ProjectDetails() {
                 </form>
 
                 <div className="space-y-3">
-                    {project.tasks.map((task) => (
+                    {(project.tasks || []).map((task) => (
                         <TaskCard
                             key={task.id}
                             task={task}
@@ -191,7 +221,7 @@ export default function ProjectDetails() {
                         />
                     ))}
 
-                    {project.tasks.length === 0 && (
+                    {(project.tasks || []).length === 0 && (
                         <p className="text-sm text-neutral-500">No tasks yet.</p>
                     )}
                 </div>

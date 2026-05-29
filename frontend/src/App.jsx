@@ -9,7 +9,7 @@ import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute";
 import ClientDetails from "./pages/ClientDetails";
-import ProjectDetails from "./pages/ProductsDetails";
+import ProjectDetails from "./pages/ProjectDetails";
 export default function App() {
   return (
     <BrowserRouter>
