@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layout/MainLayout";
-import { Calendar, Plus, Wallet } from "lucide-react";
+import { Calendar, Plus, Wallet, Trash2 } from "lucide-react";
 import ProjectModal from "../components/ProjectModal";
 export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false); 
+  const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
   async function loadProjects() {
     try {
       setLoading(true);
@@ -33,10 +38,25 @@ export default function Projects() {
     }
   }
 
-  useEffect(() => {
-    loadProjects();
-  }, []);
 
+  async function handleDeleteProject(id) {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`http://localhost:4000/api/projects/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) return;
+
+      setProjects((prev) => prev.filter((project) => project.id !== id));
+    } catch (error) {
+      console.log(error);
+    }
+  }
   return (
     <MainLayout>
       <div className="mb-8 flex items-center justify-between">
@@ -46,7 +66,7 @@ export default function Projects() {
         </div>
 
         <button onClick={() => setModalOpen(true)}
-         className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-neutral-200">
+          className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-neutral-200">
           <Plus size={18} />
           Add project
         </button>
@@ -80,9 +100,18 @@ export default function Projects() {
                   </p>
                 </div>
 
-                <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-neutral-300">
-                  {project.status}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-neutral-300">
+                    {project.status}
+                  </span>
+
+                  <button
+                    onClick={() => handleDeleteProject(project.id)}
+                    className="rounded-xl p-2 text-neutral-500 transition hover:bg-red-500/10 hover:text-red-400"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
 
               <div className="mt-6 space-y-3 text-sm text-neutral-400">

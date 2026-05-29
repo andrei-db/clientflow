@@ -54,5 +54,38 @@ router.post("/", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    const project = await prisma.project.findFirst({
+      where: {
+        id,
+        userId: req.user.id,
+      },
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found",
+      });
+    }
+
+    await prisma.project.delete({
+      where: {
+        id,
+      },
+    });
+
+    res.json({
+      message: "Project deleted successfully",
+    });
+  } catch (error) {
+    console.log("DELETE PROJECT ERROR:", error);
+
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+});
 export default router;
