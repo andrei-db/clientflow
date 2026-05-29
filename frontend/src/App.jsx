@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute";
 import ClientDetails from "./pages/ClientDetails";
+import ProjectDetails from "./pages/ProductsDetails";
 export default function App() {
   return (
     <BrowserRouter>
@@ -47,6 +48,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ClientDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/:id"
+          element={
+            <ProtectedRoute>
+              <ProjectDetails />
             </ProtectedRoute>
           }
         />

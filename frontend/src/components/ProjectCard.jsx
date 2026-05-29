@@ -1,5 +1,5 @@
 import { Calendar, Pencil, Trash2, Wallet } from "lucide-react";
-
+import { Link } from "react-router-dom";
 export default function ProjectCard({
     project,
     onEdit,
@@ -10,7 +10,12 @@ export default function ProjectCard({
         <div className="rounded-2xl border border-white/10 bg-black/30 p-5">
             <div className="flex items-start justify-between gap-4">
                 <div>
-                    <h3 className="text-lg font-semibold">{project.title}</h3>
+                    <Link
+                        to={`/projects/${project.id}`}
+                        className="text-lg font-semibold hover:text-neutral-300"
+                    >
+                        {project.title}
+                    </Link>
                     <p className="mt-2 text-sm text-neutral-500">
                         {project.description || "No description"}
                     </p>
