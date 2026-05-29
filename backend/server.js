@@ -6,6 +6,7 @@ import authRoutes from "./src/routes/authRoutes.js";
 import clientRoutes from "./src/routes/clientRoutes.js";
 import projectRoutes from "./src/routes/projectRoutes.js";
 import activityRoutes from "./src/routes/activityRoutes.js";
+import taskRoutes from "./src/routes/taskRoutes.js";
 const app = express();
 
 app.use(
@@ -25,7 +26,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/activities", activityRoutes);
-
+app.use("/api/tasks", taskRoutes);
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {

@@ -114,6 +114,11 @@ router.get("/:id", async (req, res) => {
             },
             include: {
                 client: true,
+                tasks: {
+                    orderBy: {
+                        createdAt: "desc",
+                    },
+                },
             },
         });
 
