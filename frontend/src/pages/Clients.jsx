@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layout/MainLayout";
-import { Mail, Phone, Plus, Trash2, Pencil } from "lucide-react";
+import { Plus } from "lucide-react";
 import ClientModal from "../components/ClientModal";
 import { apiFetch } from "../lib/api";
+import ClientCard from "../components/ClientCard";
 export default function Clients() {
   const [clients, setClients] = useState([]);
   const [error, setError] = useState("");
@@ -125,62 +126,15 @@ export default function Clients() {
       {!loading && filteredClients.length > 0 && (
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filteredClients.map((client) => (
-            <div
+            <ClientCard
               key={client.id}
-              className="rounded-3xl border border-white/10 bg-white/[0.03] p-6"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-xl font-semibold">{client.name}</h3>
-                  <p className="mt-1 text-sm text-neutral-500">
-                    {client.company}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-neutral-300">
-                    {client.status}
-                  </span>
-
-                  <button
-                    onClick={() => {
-                      setEditingClient(client);
-                      setModalOpen(true);
-                    }}
-                    className="rounded-xl p-2 text-neutral-500 transition hover:bg-white/10 hover:text-white"
-                  >
-                    <Pencil size={16} />
-                  </button>
-
-                  <button
-                    onClick={() => handleDeleteClient(client.id)}
-                    className="rounded-xl p-2 text-neutral-500 transition hover:bg-red-500/10 hover:text-red-400"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-
-              </div>
-
-              <div className="mt-6 space-y-3 text-sm text-neutral-400">
-                <p className="flex items-center gap-2">
-                  <Mail size={16} />
-                  {client.email}
-                </p>
-
-                {client.phone && (
-                  <p className="flex items-center gap-2">
-                    <Phone size={16} />
-                    {client.phone}
-                  </p>
-                )}
-              </div>
-
-              <div className="mt-6 rounded-2xl bg-black/30 p-4">
-                <p className="text-xs text-neutral-500">Estimated value</p>
-                <p className="mt-1 text-2xl font-bold">€{client.value}</p>
-              </div>
-            </div>
+              client={client}
+              onEdit={(client) => {
+                setEditingClient(client);
+                setModalOpen(true);
+              }}
+              onDelete={handleDeleteClient}
+            />
           ))}
         </div>
       )}
