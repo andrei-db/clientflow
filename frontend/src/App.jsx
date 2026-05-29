@@ -8,6 +8,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute";
+import ClientDetails from "./pages/ClientDetails";
 export default function App() {
   return (
     <BrowserRouter>
@@ -39,6 +40,14 @@ export default function App() {
             <GuestRoute>
               <Register />
             </GuestRoute>
+          }
+        />
+        <Route
+          path="/clients/:id"
+          element={
+            <ProtectedRoute>
+              <ClientDetails />
+            </ProtectedRoute>
           }
         />
       </Routes>

@@ -98,6 +98,41 @@ router.get("/stats", async (req, res) => {
         });
     }
 });
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const client = await prisma.client.findFirst({
+      where: {
+        id,
+        userId: req.user.id,
+      },
+      include: {
+        projects: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+      },
+    });
+
+    if (!client) {
+      return res.status(404).json({
+        message: "Client not found",
+      });
+    }
+
+    res.json({
+      client,
+    });
+  } catch (error) {
+    console.log("GET CLIENT ERROR:", error);
+
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+});
 router.patch("/:id", async (req, res) => {
     try {
         const { id } = req.params;
