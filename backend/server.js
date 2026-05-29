@@ -1,34 +1,32 @@
 import express from "express";
 import cors from "cors";
-import { prisma } from "./src/lib/prisma.js";
-import authRoutes from './src/routes/authRoutes.js'
-import clientRoutes from './src/routes/clientRoutes.js'
-import projectRoutes from './src/routes/projectRoutes.js'
+import "dotenv/config";
+
+import authRoutes from "./src/routes/authRoutes.js";
+import clientRoutes from "./src/routes/clientRoutes.js";
+import projectRoutes from "./src/routes/projectRoutes.js";
+
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
   res.json({ message: "API running" });
 });
 
-const PORT = 4000;
+app.use("/api/auth", authRoutes);
+app.use("/api/clients", clientRoutes);
+app.use("/api/projects", projectRoutes);
+
+const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-
-app.get("/api/health", async (req, res) => {
-  const users = await prisma.user.count();
-
-  res.json({
-    message: "API running",
-    users,
-  });
-});
-
-app.use("/api/auth", authRoutes);
-app.use("/api/clients", clientRoutes);
-app.use("/api/projects", projectRoutes);
