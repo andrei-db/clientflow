@@ -8,10 +8,21 @@ export default function Projects() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
-
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   useEffect(() => {
     loadProjects();
   }, []);
+  const filteredProjects = projects.filter((project) => {
+    const matchesSearch =
+      project.title?.toLowerCase().includes(search.toLowerCase()) ||
+      project.description?.toLowerCase().includes(search.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "all" || project.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
 
   async function loadProjects() {
     try {
@@ -78,6 +89,26 @@ export default function Projects() {
 
       {error && <p className="text-sm text-red-400">{error}</p>}
 
+      <div className="mb-6 flex flex-col gap-3 md:flex-row">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search projects..."
+          className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm outline-none"
+        />
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm outline-none"
+        >
+          <option value="all">All statuses</option>
+          <option value="planned">Planned</option>
+          <option value="in_progress">In progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+
       {loading && (
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3].map((item) => (
@@ -91,7 +122,7 @@ export default function Projects() {
 
       {!loading && projects.length > 0 && (
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {projects.map((project) => (
+          {filteredProjects.map((project) => (
             <div
               key={project.id}
               className="rounded-3xl border border-white/10 bg-white/[0.03] p-6"
@@ -146,7 +177,7 @@ export default function Projects() {
         </div>
       )}
 
-      {!loading && projects.length === 0 && (
+      {!loading && filteredProjects.length === 0 && (
         <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.03] p-12 text-center">
           <h3 className="text-xl font-semibold">No projects yet</h3>
           <p className="mt-2 text-sm text-neutral-500">
