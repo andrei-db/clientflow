@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import ActivityFeed from "../components/ActivityFeed";
 import ClientsStatusChart from "../components/ClientsStatusChart";
 import ProjectsStatusChart from "../components/ProjectsStatusChart";
+import RevenueChart from "../components/RevenueChart";
 export default function Dashboard() {
     const [stats, setStats] = useState({
         totalClients: 0,
@@ -109,6 +110,12 @@ export default function Dashboard() {
                 <ProjectsStatusChart stats={projectStats} />
             </div>
 
+            <div className="mt-8">
+                <RevenueChart
+                    clientRevenue={stats.estimatedRevenue}
+                    projectRevenue={projectStats.totalBudget}
+                />
+            </div>
 
             <div className="mt-8 grid gap-6 xl:grid-cols-2">
                 <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
