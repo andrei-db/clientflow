@@ -45,6 +45,13 @@ router.post("/", async (req, res) => {
             },
         });
 
+        await createActivity({
+            userId: req.user.id,
+            action: "created",
+            entityType: "project",
+            entityName: project.title,
+        });
+
         res.status(201).json({
             message: "Project created",
             project,
@@ -114,6 +121,13 @@ router.patch("/:id", async (req, res) => {
             },
         });
 
+        await createActivity({
+            userId: req.user.id,
+            action: "updated",
+            entityType: "project",
+            entityName: project.title,
+        });
+
         res.json({
             message: "Project updated successfully",
             project,
@@ -147,6 +161,13 @@ router.delete("/:id", async (req, res) => {
             where: {
                 id,
             },
+        });
+
+        await createActivity({
+            userId: req.user.id,
+            action: "deleted",
+            entityType: "project",
+            entityName: project.title,
         });
 
         res.json({

@@ -129,6 +129,13 @@ router.patch("/:id", async (req, res) => {
             },
         });
 
+        await createActivity({
+            userId: req.user.id,
+            action: "updated",
+            entityType: "client",
+            entityName: client.name,
+        });
+
         res.json({
             message: "Client updated successfully",
             client,
@@ -162,6 +169,13 @@ router.delete("/:id", async (req, res) => {
             where: {
                 id,
             },
+        });
+
+        await createActivity({
+            userId: req.user.id,
+            action: "deleted",
+            entityType: "client",
+            entityName: client.name,
         });
 
         res.json({

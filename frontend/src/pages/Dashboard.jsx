@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import ActivityFeed from "../components/ActivityFeed";
+
 export default function Dashboard() {
     const [stats, setStats] = useState({
         totalClients: 0,
@@ -28,7 +29,7 @@ export default function Dashboard() {
 
     const [recentClients, setRecentClients] = useState([]);
     const [recentProjects, setRecentProjects] = useState([]);
-
+    const [activities, setActivities] = useState([]);
     useEffect(() => {
         async function loadStats() {
             const clientStats = await apiFetch("/api/clients/stats");
@@ -53,6 +54,12 @@ export default function Dashboard() {
 
             if (projects.res.ok) {
                 setRecentProjects(projects.data.projects.slice(0, 5));
+            }
+
+            const activitiesResponse = await apiFetch("/api/activities");
+
+            if (activitiesResponse.res.ok) {
+                setActivities(activitiesResponse.data.activities);
             }
         }
 
@@ -218,8 +225,7 @@ export default function Dashboard() {
 
             <div className="mt-8">
                 <ActivityFeed
-                    clients={recentClients}
-                    projects={recentProjects}
+                    activities={activities}
                 />
             </div>
         </MainLayout>
