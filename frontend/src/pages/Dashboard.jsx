@@ -25,6 +25,7 @@ export default function Dashboard() {
     });
 
     const [recentClients, setRecentClients] = useState([]);
+    const [recentProjects, setRecentProjects] = useState([]);
 
     useEffect(() => {
         async function loadStats() {
@@ -66,6 +67,18 @@ export default function Dashboard() {
 
             if (projectStatsRes.ok) {
                 setProjectStats(projectStatsData);
+            }
+
+            const projectsRes = await fetch("http://localhost:4000/api/projects", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const projectsData = await projectsRes.json();
+
+            if (projectsRes.ok) {
+                setRecentProjects(projectsData.projects.slice(0, 5));
             }
         }
 
@@ -109,38 +122,75 @@ export default function Dashboard() {
                 />
             </div>
 
-            <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                <div className="mb-6">
-                    <h3 className="text-xl font-semibold">Recent clients</h3>
-                    <p className="text-sm text-neutral-500">
-                        Latest clients added to your CRM.
-                    </p>
+
+            <div className="grid grid-cols-2 gap-5 mt-8">
+                <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+                    <div className="mb-6">
+                        <h3 className="text-xl font-semibold">Recent clients</h3>
+                        <p className="text-sm text-neutral-500">
+                            Latest clients added to your CRM.
+                        </p>
+                    </div>
+
+                    <div className="space-y-3">
+                        {recentClients.map((client) => (
+                            <div
+                                key={client.id}
+                                className="flex items-center justify-between rounded-2xl bg-black/30 px-4 py-4"
+                            >
+                                <div>
+                                    <p className="font-medium">{client.name}</p>
+                                    <p className="text-sm text-neutral-500">{client.company}</p>
+                                </div>
+
+                                <div className="text-right">
+                                    <p className="text-sm font-medium">€{client.value}</p>
+                                    <p className="text-xs text-neutral-500">{client.status}</p>
+                                </div>
+                            </div>
+                        ))}
+
+                        {recentClients.length === 0 && (
+                            <p className="text-sm text-neutral-500">No clients yet.</p>
+                        )}
+                    </div>
                 </div>
+                <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+                    <div className="mb-6">
+                        <h3 className="text-xl font-semibold">Recent projects</h3>
+                        <p className="text-sm text-neutral-500">
+                            Latest projects added to your workspace.
+                        </p>
+                    </div>
 
-                <div className="space-y-3">
-                    {recentClients.map((client) => (
-                        <div
-                            key={client.id}
-                            className="flex items-center justify-between rounded-2xl bg-black/30 px-4 py-4"
-                        >
-                            <div>
-                                <p className="font-medium">{client.name}</p>
-                                <p className="text-sm text-neutral-500">{client.company}</p>
+                    <div className="space-y-3">
+                        {recentProjects.map((project) => (
+                            <div
+                                key={project.id}
+                                className="flex items-center justify-between rounded-2xl bg-black/30 px-4 py-4"
+                            >
+                                <div>
+                                    <p className="font-medium">{project.title}</p>
+                                    <p className="text-sm text-neutral-500">
+                                        {project.description || "No description"}
+                                    </p>
+                                </div>
+
+                                <div className="text-right">
+                                    <p className="text-sm font-medium">€{project.budget}</p>
+                                    <p className="text-xs text-neutral-500">{project.status}</p>
+                                </div>
                             </div>
+                        ))}
 
-                            <div className="text-right">
-                                <p className="text-sm font-medium">€{client.value}</p>
-                                <p className="text-xs text-neutral-500">{client.status}</p>
-                            </div>
-                        </div>
-                    ))}
-
-                    {recentClients.length === 0 && (
-                        <p className="text-sm text-neutral-500">No clients yet.</p>
-                    )}
+                        {recentProjects.length === 0 && (
+                            <p className="text-sm text-neutral-500">No projects yet.</p>
+                        )}
+                    </div>
                 </div>
             </div>
-            <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+
+            <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
                 <StatCard
                     title="Total Projects"
                     value={projectStats.totalProjects}
