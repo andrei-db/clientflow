@@ -18,6 +18,8 @@ model User {
   clients      Client[]
 
   projects     Project[]
+
+  activities Activity[]
 }
 
 model Client {
@@ -42,6 +44,17 @@ model Project {
   status      String   @default("planned")
   budget      Int      @default(0)
   deadline    DateTime?
+  createdAt   DateTime @default(now())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  action      String
+  entityType  String
+  entityName  String
   createdAt   DateTime @default(now())
 
   userId      String

@@ -1,6 +1,7 @@
 import express from "express";
 import { prisma } from "../lib/prisma.js";
 import { authRequired } from "../middleware/authMiddleware.js";
+import { createActivity } from "../lib/activity.js";
 
 const router = express.Router();
 
@@ -45,6 +46,13 @@ router.post("/", async (req, res) => {
                 notes,
                 userId: req.user.id,
             },
+        });
+
+        await createActivity({
+            userId: req.user.id,
+            action: "created",
+            entityType: "client",
+            entityName: client.name,
         });
 
         res.status(201).json({ client });

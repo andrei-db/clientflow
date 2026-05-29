@@ -9,6 +9,7 @@ import {
     BadgeDollarSign,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import ActivityFeed from "../components/ActivityFeed";
 export default function Dashboard() {
     const [stats, setStats] = useState({
         totalClients: 0,
@@ -183,6 +184,8 @@ export default function Dashboard() {
                 </div>
             </div>
 
+
+
             <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
                 <StatCard
                     title="Total Projects"
@@ -210,6 +213,13 @@ export default function Dashboard() {
                     value={`€${projectStats.totalBudget}`}
                     description="Total project value"
                     icon={BadgeDollarSign}
+                />
+            </div>
+
+            <div className="mt-8">
+                <ActivityFeed
+                    clients={recentClients}
+                    projects={recentProjects}
                 />
             </div>
         </MainLayout>
