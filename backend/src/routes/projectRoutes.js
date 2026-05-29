@@ -12,6 +12,9 @@ router.get("/", async (req, res) => {
             where: {
                 userId: req.user.id,
             },
+            include: {
+                client: true,
+            },
             orderBy: {
                 createdAt: "desc",
             },
@@ -26,7 +29,7 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
     try {
-        const { title, description, status, budget, deadline } = req.body;
+        const { title, description, status, budget, deadline, clientId } = req.body;
 
         if (!title) {
             return res.status(400).json({
@@ -41,7 +44,11 @@ router.post("/", async (req, res) => {
                 status: status || "planned",
                 budget: Number(budget) || 0,
                 deadline: deadline ? new Date(deadline) : null,
+                clientId: clientId || null,
                 userId: req.user.id,
+            },
+            include: {
+                client: true,
             },
         });
 
@@ -66,6 +73,12 @@ router.get("/stats", async (req, res) => {
         const projects = await prisma.project.findMany({
             where: {
                 userId: req.user.id,
+            },
+            include: {
+                client: true,
+            },
+            orderBy: {
+                createdAt: "desc",
             },
         });
 
@@ -93,7 +106,7 @@ router.get("/stats", async (req, res) => {
 router.patch("/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, status, budget, deadline } = req.body;
+        const { title, description, status, budget, deadline, clientId } = req.body;
 
         const existingProject = await prisma.project.findFirst({
             where: {
@@ -118,6 +131,10 @@ router.patch("/:id", async (req, res) => {
                 status,
                 budget: Number(budget) || 0,
                 deadline: deadline ? new Date(deadline) : null,
+                clientId: clientId || null,
+            },
+            include: {
+                client: true,
             },
         });
 

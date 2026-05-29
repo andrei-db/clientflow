@@ -8,6 +8,7 @@ const emptyForm = {
     status: "planned",
     budget: "",
     deadline: "",
+    clientId: "",
 };
 
 export default function ProjectModal({
@@ -19,6 +20,7 @@ export default function ProjectModal({
     const [formData, setFormData] = useState(emptyForm);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [clients, setClients] = useState([]);
 
     useEffect(() => {
         if (editingProject) {
@@ -30,6 +32,7 @@ export default function ProjectModal({
                 deadline: editingProject.deadline
                     ? editingProject.deadline.split("T")[0]
                     : "",
+                clientId: editingProject.clientId || "",
             });
         } else {
             setFormData(emptyForm);
@@ -37,6 +40,20 @@ export default function ProjectModal({
 
         setError("");
     }, [editingProject, open]);
+
+    useEffect(() => {
+        async function loadClients() {
+            const { res, data } = await apiFetch("/api/clients");
+
+            if (res.ok) {
+                setClients(data.clients);
+            }
+        }
+
+        if (open) {
+            loadClients();
+        }
+    }, [open]);
 
     if (!open) return null;
 
@@ -65,7 +82,7 @@ export default function ProjectModal({
                 body: JSON.stringify(formData),
             });
 
-          
+
 
             if (!project.res.ok) {
                 setError(project.data.message || "Could not create project");
@@ -124,6 +141,21 @@ export default function ProjectModal({
                         placeholder="Budget"
                         className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 outline-none"
                     />
+
+                    <select
+                        name="clientId"
+                        value={formData.clientId}
+                        onChange={handleChange}
+                        className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 outline-none"
+                    >
+                        <option value="">No client</option>
+
+                        {clients.map((client) => (
+                            <option key={client.id} value={client.id}>
+                                {client.name} — {client.company}
+                            </option>
+                        ))}
+                    </select>
 
                     <select
                         name="status"
