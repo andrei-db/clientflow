@@ -23,18 +23,20 @@ model User {
 }
 
 model Client {
-  id        String   @id @default(uuid())
-  name      String
-  company   String
-  email     String
-  phone     String?
-  status    String   @default("lead")
-  value     Int      @default(0)
-  notes     String?
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid())
+  name        String
+  company     String
+  email       String
+  phone       String?
+  status      String   @default("lead")
+  value       Int      @default(0)
+  notes       String?
+  createdAt   DateTime @default(now())
 
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects    Project[]
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Project {
@@ -45,6 +47,9 @@ model Project {
   budget      Int      @default(0)
   deadline    DateTime?
   createdAt   DateTime @default(now())
+
+  clientId    String?
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
 
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
