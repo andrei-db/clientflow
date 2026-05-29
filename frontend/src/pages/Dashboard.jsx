@@ -7,7 +7,7 @@ import {
     TrendingUp,
     BadgeDollarSign,
 } from "lucide-react";
-
+import { Link } from "react-router-dom";
 export default function Dashboard() {
     const [stats, setStats] = useState({
         totalClients: 0,
@@ -123,13 +123,22 @@ export default function Dashboard() {
             </div>
 
 
-            <div className="grid grid-cols-2 gap-5 mt-8">
+            <div className="mt-8 grid gap-6 xl:grid-cols-2">
                 <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                    <div className="mb-6">
-                        <h3 className="text-xl font-semibold">Recent clients</h3>
-                        <p className="text-sm text-neutral-500">
-                            Latest clients added to your CRM.
-                        </p>
+                    <div className="mb-6 flex items-center justify-between">
+                        <div>
+                            <h3 className="text-xl font-semibold">Recent projects</h3>
+                            <p className="text-sm text-neutral-500">
+                                Latest clients added to your workspace.
+                            </p>
+                        </div>
+
+                        <Link
+                            to="/clients"
+                            className="text-sm text-neutral-400 hover:text-white"
+                        >
+                            View all
+                        </Link>
                     </div>
 
                     <div className="space-y-3">
@@ -156,11 +165,20 @@ export default function Dashboard() {
                     </div>
                 </div>
                 <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                    <div className="mb-6">
-                        <h3 className="text-xl font-semibold">Recent projects</h3>
-                        <p className="text-sm text-neutral-500">
-                            Latest projects added to your workspace.
-                        </p>
+                    <div className="mb-6 flex items-center justify-between">
+                        <div>
+                            <h3 className="text-xl font-semibold">Recent projects</h3>
+                            <p className="text-sm text-neutral-500">
+                                Latest projects added to your workspace.
+                            </p>
+                        </div>
+
+                        <Link
+                            to="/projects"
+                            className="text-sm text-neutral-400 hover:text-white"
+                        >
+                            View all
+                        </Link>
                     </div>
 
                     <div className="space-y-3">
@@ -178,7 +196,9 @@ export default function Dashboard() {
 
                                 <div className="text-right">
                                     <p className="text-sm font-medium">€{project.budget}</p>
-                                    <p className="text-xs text-neutral-500">{project.status}</p>
+                                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-neutral-400">
+                                        {project.status}
+                                    </span>
                                 </div>
                             </div>
                         ))}
