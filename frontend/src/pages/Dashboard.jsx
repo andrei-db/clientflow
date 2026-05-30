@@ -13,6 +13,7 @@ import ActivityFeed from "../components/ActivityFeed";
 import ClientsStatusChart from "../components/ClientsStatusChart";
 import ProjectsStatusChart from "../components/ProjectsStatusChart";
 import RevenueChart from "../components/RevenueChart";
+import InvoicesStatusChart from "../components/InvoicesStatusChart";
 export default function Dashboard() {
     const [stats, setStats] = useState({
         totalClients: 0,
@@ -27,6 +28,15 @@ export default function Dashboard() {
         inProgress: 0,
         completed: 0,
         totalBudget: 0,
+    });
+    const [invoiceStats, setInvoiceStats] = useState({
+        totalInvoices: 0,
+        draft: 0,
+        sent: 0,
+        paid: 0,
+        overdue: 0,
+        totalRevenue: 0,
+        outstanding: 0,
     });
 
     const [recentClients, setRecentClients] = useState([]);
@@ -62,6 +72,13 @@ export default function Dashboard() {
 
             if (activitiesResponse.res.ok) {
                 setActivities(activitiesResponse.data.activities);
+            }
+
+            const invoiceStatsResponse =
+                await apiFetch("/api/invoices/stats");
+
+            if (invoiceStatsResponse.res.ok) {
+                setInvoiceStats(invoiceStatsResponse.data);
             }
         }
 
@@ -240,6 +257,45 @@ export default function Dashboard() {
                 <ActivityFeed
                     activities={activities}
                 />
+            </div>
+
+            <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+                <StatCard
+                    title="Invoices"
+                    value={invoiceStats.totalInvoices}
+                    description="Total invoices created"
+                    icon={BadgeDollarSign}
+                />
+
+                <StatCard
+                    title="Paid Revenue"
+                    value={`€${invoiceStats.totalRevenue}`}
+                    description="Revenue from paid invoices"
+                    icon={TrendingUp}
+                />
+
+                <StatCard
+                    title="Outstanding"
+                    value={`€${invoiceStats.outstanding}`}
+                    description="Sent or overdue invoices"
+                    icon={BriefcaseBusiness}
+                />
+
+                <StatCard
+                    title="Overdue"
+                    value={invoiceStats.overdue}
+                    description="Invoices past due status"
+                    icon={Users}
+                />
+            </div>
+
+            <div className="mt-8 grid gap-6 xl:grid-cols-2">
+                <RevenueChart
+                    clientRevenue={stats.estimatedRevenue}
+                    projectRevenue={projectStats.totalBudget}
+                />
+
+                <InvoicesStatusChart stats={invoiceStats} />
             </div>
         </MainLayout>
     );

@@ -78,6 +78,42 @@ router.post("/", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+router.get("/stats", async (req, res) => {
+  try {
+    const invoices = await prisma.invoice.findMany({
+      where: {
+        userId: req.user.id,
+      },
+    });
+
+    const totalInvoices = invoices.length;
+    const draft = invoices.filter((i) => i.status === "draft").length;
+    const sent = invoices.filter((i) => i.status === "sent").length;
+    const paid = invoices.filter((i) => i.status === "paid").length;
+    const overdue = invoices.filter((i) => i.status === "overdue").length;
+
+    const totalRevenue = invoices
+      .filter((i) => i.status === "paid")
+      .reduce((sum, invoice) => sum + invoice.amount, 0);
+
+    const outstanding = invoices
+      .filter((i) => i.status === "sent" || i.status === "overdue")
+      .reduce((sum, invoice) => sum + invoice.amount, 0);
+
+    res.json({
+      totalInvoices,
+      draft,
+      sent,
+      paid,
+      overdue,
+      totalRevenue,
+      outstanding,
+    });
+  } catch (error) {
+    console.log("INVOICE STATS ERROR:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 router.patch("/:id", async (req, res) => {
   try {
     const { id } = req.params;
