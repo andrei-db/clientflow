@@ -4,6 +4,7 @@ import {
     BriefcaseBusiness,
     KanbanSquare,
     Settings,
+    ReceiptText
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import Topbar from "../components/Topbar";
@@ -14,6 +15,7 @@ const navItems = [
     { label: "Projects", path: "/projects", icon: BriefcaseBusiness },
     { label: "Pipeline", path: "/pipeline", icon: KanbanSquare },
     { label: "Settings", path: "/settings", icon: Settings },
+    { label: "Invoices", path: "/invoices", icon: ReceiptText }
 ];
 
 export default function MainLayout({ children }) {

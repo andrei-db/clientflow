@@ -10,6 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute";
 import ClientDetails from "./pages/ClientDetails";
 import ProjectDetails from "./pages/ProjectDetails";
+import Invoices from "./pages/Invoices";
 export default function App() {
   return (
     <BrowserRouter>
@@ -56,6 +57,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ProjectDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/invoices"
+          element={
+            <ProtectedRoute>
+              <Invoices />
             </ProtectedRoute>
           }
         />
