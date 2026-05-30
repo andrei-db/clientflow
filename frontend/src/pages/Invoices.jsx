@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layout/MainLayout";
 import { apiFetch } from "../lib/api";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import InvoiceModal from "../components/InvoiceModal";
+
 export default function Invoices() {
     const [invoices, setInvoices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
+    const [editingInvoice, setEditingInvoice] = useState(null);
+
+    useEffect(() => {
+        loadInvoices();
+    }, []);
+
     async function loadInvoices() {
         setLoading(true);
 
@@ -19,9 +26,19 @@ export default function Invoices() {
         setLoading(false);
     }
 
-    useEffect(() => {
-        loadInvoices();
-    }, []);
+
+
+    async function handleDeleteInvoice(id) {
+        const { res } = await apiFetch(`/api/invoices/${id}`, {
+            method: "DELETE",
+        });
+
+        if (!res.ok) return;
+
+        setInvoices((prev) =>
+            prev.filter((invoice) => invoice.id !== id)
+        );
+    }
 
     return (
         <MainLayout>
@@ -31,7 +48,10 @@ export default function Invoices() {
                     <h2 className="text-4xl font-bold tracking-tight">Invoices</h2>
                 </div>
 
-                <button onClick={() => setModalOpen(true)}
+                <button onClick={() => {
+                    setEditingInvoice(null);
+                    setModalOpen(true);
+                }}
                     className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-neutral-200">
                     <Plus size={18} />
                     Add invoice
@@ -54,10 +74,30 @@ export default function Invoices() {
                                 </p>
                             </div>
 
-                            <div className="text-right">
+                            <div className="text-right flex items-center gap-5">
                                 <p className="font-semibold">€{invoice.amount}</p>
                                 <p className="text-sm text-neutral-500">{invoice.status}</p>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => {
+                                            setEditingInvoice(invoice);
+                                            setModalOpen(true);
+                                        }}
+                                        className="rounded-xl p-2 text-neutral-500 hover:bg-white/10 hover:text-white"
+                                    >
+                                        <Pencil size={16} />
+                                    </button>
+
+                                    <button
+                                        onClick={() => handleDeleteInvoice(invoice.id)}
+                                        className="rounded-xl p-2 text-neutral-500 hover:bg-red-500/10 hover:text-red-400"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
                             </div>
+
+
                         </div>
                     ))}
 
@@ -70,10 +110,26 @@ export default function Invoices() {
             )}
             <InvoiceModal
                 open={modalOpen}
-                onClose={() => setModalOpen(false)}
-                onInvoiceCreated={(newInvoice) =>
-                    setInvoices((prev) => [newInvoice, ...prev])
-                }
+                editingInvoice={editingInvoice}
+                onClose={() => {
+                    setModalOpen(false);
+                    setEditingInvoice(null);
+                }}
+                onInvoiceSaved={(savedInvoice) => {
+                    setInvoices((prev) => {
+                        const exists = prev.some(
+                            (invoice) => invoice.id === savedInvoice.id
+                        );
+
+                        if (exists) {
+                            return prev.map((invoice) =>
+                                invoice.id === savedInvoice.id ? savedInvoice : invoice
+                            );
+                        }
+
+                        return [savedInvoice, ...prev];
+                    });
+                }}
             />
         </MainLayout>
     );
