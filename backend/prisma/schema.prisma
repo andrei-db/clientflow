@@ -22,6 +22,8 @@ model User {
   activities Activity[]
 
   tasks Task[]
+
+  invoices Invoice[]
 }
 
 model Client {
@@ -39,6 +41,8 @@ model Client {
 
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  invoices Invoice[]
 }
 
 model Project {
@@ -81,4 +85,20 @@ model Task {
 
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id          String   @id @default(uuid())
+  number      String
+  amount      Int
+  status      String   @default("draft")
+
+  createdAt   DateTime @default(now())
+  dueDate     DateTime?
+
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
