@@ -78,5 +78,65 @@ router.post("/", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+router.patch("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { number, amount, status, dueDate, clientId } = req.body;
 
+    const existingInvoice = await prisma.invoice.findFirst({
+      where: {
+        id,
+        userId: req.user.id,
+      },
+    });
+
+    if (!existingInvoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
+
+    const invoice = await prisma.invoice.update({
+      where: { id },
+      data: {
+        number,
+        amount: Number(amount) || 0,
+        status,
+        dueDate: dueDate ? new Date(dueDate) : null,
+        clientId,
+      },
+      include: {
+        client: true,
+      },
+    });
+
+    res.json({ invoice });
+  } catch (error) {
+    console.log("UPDATE INVOICE ERROR:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const invoice = await prisma.invoice.findFirst({
+      where: {
+        id,
+        userId: req.user.id,
+      },
+    });
+
+    if (!invoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
+
+    await prisma.invoice.delete({
+      where: { id },
+    });
+
+    res.json({ message: "Invoice deleted successfully" });
+  } catch (error) {
+    console.log("DELETE INVOICE ERROR:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 export default router;
